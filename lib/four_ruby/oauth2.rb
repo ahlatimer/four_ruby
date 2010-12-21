@@ -6,7 +6,7 @@ require 'oauth2'
 Hash.send :include, Hashie::HashExtensions
 
 module FourRuby
-  class Oauth2
+  class OAuth2
     attr_accessor :client, :id, :secret
   
     def initialize(id, secret, options={})

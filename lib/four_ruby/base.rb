@@ -9,6 +9,7 @@ module FourRuby
   class Base
     BASE_URL = 'https://api.foursquare.com/v2'
     ENDPOINTS = [:users, :venues, :tips, :settings, :multi]
+    attr_accessor :query
     
     def initialize(oauth2)
       @oauth2 = oauth2
@@ -40,12 +41,16 @@ module FourRuby
       url = "#{BASE_URL}/#{@endpoint.to_s}#{@query[@endpoint][:id].nil? ? "" : "/" + @query[@endpoint][:id].to_s}"
       @query[@endpoint].each do |k,v|
         next if k == :id
-        url += "/#{k}?"
-        url += stringify_keys(v)
+        url << "/#{k}?"
+        url << stringify_keys(v)
+      end
+      if @query[@endpoint].size <= 1 && @query[@endpoint][:id]
+        url << "?" 
+      else
+        url << "&" if url[-1..url.length] != "?"
       end
       # TODO: allow access via an oauth_token
-      url += url[-1..url.length] == "?" ? "" : "&"
-      url += "client_id=#{@oauth2.id}&client_secret=#{@oauth2.secret}"
+      url << "client_id=#{@oauth2.id}&client_secret=#{@oauth2.secret}"
       url = URI.escape(url)
       url
     end
