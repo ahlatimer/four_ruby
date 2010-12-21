@@ -7,10 +7,10 @@ Hash.send :include, Hashie::HashExtensions
 
 module FourRuby
   class Oauth2
-    attr_accessor :client
+    attr_accessor :client, :id, :secret
   
     def initialize(id, secret, options={})
-      @id = token
+      @id = id
       @secret = secret
     end
   

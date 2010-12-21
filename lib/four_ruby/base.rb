@@ -8,126 +8,76 @@ Hash.send :include, Hashie::HashExtensions
 module FourRuby
   class Base
     BASE_URL = 'https://api.foursquare.com/v2'
-  
+    ENDPOINTS = [:users, :venues, :tips, :settings, :multi]
+    
     def initialize(oauth2)
       @oauth2 = oauth2
+      @query = Hashie::Clash.new
+      @endpoint = nil
+      @result = nil
     end
-  
-    def method_missing(name, params={})
-      method_name = method_symbol.to_s.split(/\.|_/).join('/')
-
-      if (method_name[-1,1]) == '='
-        method = method_name[0..-2]
-        result = post(api_url(method), params)
-        params.replace(result[method] || result)
+    
+    def method_missing(method_name, params={})
+      if ENDPOINTS.include?(method_name)
+        @endpoint = method_name
+        @query.send(@endpoint, params)
+      elsif @endpoint
+        if @query[@endpoint][method_name]
+          @query[@endpoint].merge!( {method_name => params.merge(@query[@endpoint][method_name])})
+        else
+          @query[@endpoint].merge!({ method_name => params })
+        end
       else
-        result = get(api_url(method_name, params))
-        result[method_name] || result
+        raise BadRequest, 'You must specify an endpoint.'
       end
+      @result = nil
+      
+      self
     end
   
-    def api(method_symbol, params = {})
-      Hashie::Mash.new(method_missing(method_symbol, params))
-    end
-  
-    def api_url(method_name, options = nil)
-      params = options.is_a?(Hash) ? to_query_params(options) : options
-      params = nil if params and params.blank?
-      url = BASE_URL + '/' + method_name.split('.').join('/')
-      if access_token.nil?
-        url += "?client_id=#{oauth.app_id}&client_secret=#{oauth.app_secret}"
-      else
-        url += "?oauth_token=#{access_token}"
+    def to_url
+      return BASE_URL if @endpoint.nil?
+      url = "#{BASE_URL}/#{@endpoint.to_s}#{@query[@endpoint][:id].nil? ? "" : "/" + @query[@endpoint][:id].to_s}"
+      @query[@endpoint].each do |k,v|
+        next if k == :id
+        url += "/#{k}?"
+        url += stringify_keys(v)
       end
-      url += "&#{params}" if params
+      # TODO: allow access via an oauth_token
+      url += url[-1..url.length] == "?" ? "" : "&"
+      url += "client_id=#{@oauth2.id}&client_secret=#{@oauth2.secret}"
       url = URI.escape(url)
       url
     end
-  
+
+    def [](i)
+      self.to_json[i]
+    end
+    
+    def to_json
+      return {} if @query.blank?
+      @result ||= send
+    end
+    
+    def send
+      parse_response(@oauth2.get(self.to_url))
+    end
+
     def parse_response(response)
       raise_errors(response)
       Crack::JSON.parse(response.body)
     end
 
-    def to_query_params(options)
-      options.collect { |key, value| "#{key}=#{value}" }.join('&')
-    end
-
-    def get(url)
-      parse_response(@oauth2.get(url))
-    end
-
-    def post(url, body)
-      parse_response(@oauth2.post(url, body))
-    end
-
-    # API method wrappers
-
-    def checkin(params = {})
-      api(:checkin=, params).checkin
-    end
-
-    def history(params = {})
-      api(:history, params).checkins
-    end
-
-    def addvenue(params = {})
-      api(:addvenue=, params).venue
-    end
-
-    def venue_proposeedit(params = {})
-      api(:venue_proposeedit=, params)
-    end
-
-    def venue_flagclosed(params = {})
-      api(:venue_flagclosed=, params)
-    end
-
-    def addtip(params = {})
-      api(:addtip=, params).tip
-    end
-
-    def tip_marktodo(params = {})
-      api(:tip_marktodo=, params).tip
-    end
-
-    def tip_markdone(params = {})
-      api(:tip_markdone=, params).tip
-    end
-
-    def friend_requests
-      api(:friend_requests).requests
-    end
-
-    def friend_approve(params = {})
-      api(:friend_approve=, params).user
-    end
-
-    def friend_deny(params = {})
-      api(:friend_deny=, params).user
-    end
-
-    def friend_sendrequest(params = {})
-      api(:friend_sendrequest=, params).user
-    end
-
-    def findfriends_byname(params = {})
-      api(:findfriends_byname, params).users
-    end
-
-    def findfriends_byphone(params = {})
-      api(:findfriends_byphone, params).users
-    end
-
-    def findfriends_bytwitter(params = {})
-      api(:findfriends_bytwitter, params).users
-    end
-
-    def settings_setpings(params = {})
-      api(:settings_setpings=, params).settings
-    end
-
     private
+    
+    def stringify_keys(h)
+      result = ""
+      return unless h.is_a? Hash
+      h.each do |k,v|
+        result += "#{k}=#{v}&"
+      end
+      result.chomp("&")
+    end
 
     def raise_errors(response)
       message = "(#{response.code}): #{response.message} - #{response.inspect} - #{response.body}"
