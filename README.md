@@ -6,7 +6,7 @@ FourRuby supports method chaining, so you can do things like f.venues.search(:ll
 
 # Caveats
 
-FourRuby doesn't support any calls that require post or an Oauth token. That severely diminishes its usefulness, I know, but I haven't had the time to add that in yet.
+FourRuby doesn't support any calls that require post or an Oauth2 token. That severely diminishes its usefulness, I know, but I haven't had the time to add that in yet.
 
 # License
 

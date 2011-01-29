@@ -26,14 +26,14 @@ module FourRuby
         @endpoint = method_name
         @query.send(@endpoint, params)
       elsif @endpoint
-        if @query[@endpoint][method_name]
+        if @query[@endpoint][method_name] # if that method has already been called, merge the two params hashes
           @query[@endpoint].merge!( {method_name => params.merge(@query[@endpoint][method_name])})
         else
           @post = POST_ACTIONS.include? method_name
           @query[@endpoint].merge!({ method_name => params })
         end
       else
-        raise BadRequest, 'You must specify an endpoint.'
+        raise BadRequest, "You must specify an one of #{ENDPOINTS * ", "}."
       end
       @result = nil
       
@@ -51,9 +51,10 @@ module FourRuby
         end
       end
       
-      if @query[@endpoint].size <= 1 && @query[@endpoint][:id]
+      # Add a ? if either just the endpoint is being queried or just the id is being used
+      if (@query[@endpoint].size <= 1 && @query[@endpoint][:id]) || (@query[@endpoint].size == 0 && url[-1..url.length] != '?')
         url << "?" 
-      else
+      else # otherwise, add a &
         url << "&" if url[-1..url.length] != "?"
       end
       

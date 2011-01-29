@@ -9,9 +9,17 @@ module FourRuby
   class OAuth2
     attr_accessor :client, :id, :secret
   
-    def initialize(id, secret, options={})
-      @id = id
-      @secret = secret
+    def initialize(id, secret=nil, options={})
+      if secret
+        @id = id
+        @secret = secret
+      else
+        require 'yaml'
+        yml = YAML::load(File.open(id))
+        raise StandardError, "Foursquare config file does not exist" if yml['foursquare'].nil? 
+        @id = yml['foursquare']['client_id']
+        @secret = yml['foursquare']['client_secret']
+      end
     end
   
     def client
