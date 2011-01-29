@@ -12,7 +12,7 @@ FourRuby is a super-simple Ruby API wrapper for Foursquare.
     @four.venues.search(:query => 'coffee')
     @four.to_json
     # You can also treat the FourRuby::Base object like a hash directly, without calling to_json
-    @four["response"] # => returns an array of 'items' 
+    @four["response"] 
 
 # Caveats
 
