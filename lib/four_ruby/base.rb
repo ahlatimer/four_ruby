@@ -9,6 +9,8 @@ module FourRuby
   class Base
     BASE_URL = 'https://api.foursquare.com/v2'
     ENDPOINTS = [:users, :venues, :tips, :settings, :multi]
+    POST_ACTIONS = [:request, :unfriend, :approve, :deny, :setpings, :marktodo, :flag, :proposeedit, :markdone, :unmark, :add, :set]
+    
     attr_accessor :query
     
     def initialize(oauth2)
@@ -16,6 +18,7 @@ module FourRuby
       @query = Hashie::Clash.new
       @endpoint = nil
       @result = nil
+      @post = false
     end
     
     def method_missing(method_name, params={})
@@ -26,6 +29,7 @@ module FourRuby
         if @query[@endpoint][method_name]
           @query[@endpoint].merge!( {method_name => params.merge(@query[@endpoint][method_name])})
         else
+          @post = POST_ACTIONS.include? method_name
           @query[@endpoint].merge!({ method_name => params })
         end
       else
@@ -39,16 +43,20 @@ module FourRuby
     def to_url
       return BASE_URL if @endpoint.nil?
       url = "#{BASE_URL}/#{@endpoint.to_s}#{@query[@endpoint][:id].nil? ? "" : "/" + @query[@endpoint][:id].to_s}"
-      @query[@endpoint].each do |k,v|
-        next if k == :id
-        url << "/#{k}?"
-        url << stringify_keys(v)
+      unless @post
+        @query[@endpoint].each do |k,v|
+          next if k == :id
+          url << "/#{k}?"
+          url << stringify_keys(v)
+        end
       end
+      
       if @query[@endpoint].size <= 1 && @query[@endpoint][:id]
         url << "?" 
       else
         url << "&" if url[-1..url.length] != "?"
       end
+      
       # TODO: allow access via an oauth_token
       url << "client_id=#{@oauth2.id}&client_secret=#{@oauth2.secret}"
       url = URI.escape(url)
@@ -71,6 +79,13 @@ module FourRuby
     def parse_response(response)
       raise_errors(response)
       Crack::JSON.parse(response.body)
+    end
+    
+    def clear
+      @query = Hashie::Clash.new
+      @endpoint = nil
+      @result = nil
+      @post = false
     end
 
     private

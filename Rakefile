@@ -30,18 +30,18 @@ Jeweler::Tasks.new do |gem|
 end
 Jeweler::RubygemsDotOrgTasks.new
 
-require 'rake/testtask'
-Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.rspec_opts = ["--color"]
 end
 
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
+namespace :spec do 
+  desc "Run specs with RCov" 
+  RSpec::Core::RakeTask.new('rcov') do |t|
+    t.rspec_opts = ["--color"]
+    t.rcov = true 
+    t.rcov_opts = ['--exclude', '.rvm']
+  end 
 end
 
 task :default => :test
