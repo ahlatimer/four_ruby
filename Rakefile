@@ -44,7 +44,7 @@ namespace :spec do
   end 
 end
 
-task :default => :test
+task :default => :spec
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
