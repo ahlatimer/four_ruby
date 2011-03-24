@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Andrew Latimer"]
-  s.date = %q{2010-12-21}
+  s.date = %q{2011-03-23}
   s.description = %q{A simple Ruby API wrapper for Foursquare.}
   s.email = %q{andrew@elpasoera.com}
   s.extra_rdoc_files = [
@@ -24,24 +24,25 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
+    "config/foursquare_keys.example.yml",
+    "four_ruby.gemspec",
     "lib/four_ruby.rb",
     "lib/four_ruby/base.rb",
     "lib/four_ruby/oauth2.rb",
-    "test/helper.rb",
-    "test/test_four_ruby.rb"
+    "spec/four_ruby_spec.rb",
+    "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/ahlatimer/four_ruby}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.7}
+  s.rubygems_version = %q{1.5.0}
   s.summary = %q{A Ruby API wrapper for Foursquare.}
   s.test_files = [
-    "test/helper.rb",
-    "test/test_four_ruby.rb"
+    "spec/four_ruby_spec.rb",
+    "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
@@ -52,6 +53,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.2"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_runtime_dependency(%q<httparty>, [">= 0"])
       s.add_runtime_dependency(%q<hashie>, [">= 0"])
       s.add_runtime_dependency(%q<oauth2>, [">= 0"])
@@ -63,6 +65,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<rspec>, [">= 0"])
       s.add_dependency(%q<httparty>, [">= 0"])
       s.add_dependency(%q<hashie>, [">= 0"])
       s.add_dependency(%q<oauth2>, [">= 0"])
@@ -75,6 +78,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.5.2"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<rspec>, [">= 0"])
     s.add_dependency(%q<httparty>, [">= 0"])
     s.add_dependency(%q<hashie>, [">= 0"])
     s.add_dependency(%q<oauth2>, [">= 0"])
